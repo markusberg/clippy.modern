@@ -1,48 +1,42 @@
-/******
- * Tiny Queue
- *
- * @constructor
- */
-clippy.Queue = function (onEmptyCallback) {
-	this._queue = [];
-	this._onEmptyCallback = onEmptyCallback;
-};
+export class Queue {
+  constructor(onEmptyCallback) {
+    this._queue = [];
+    this._onEmptyCallback = onEmptyCallback;
+  }
+  /***
+   *
+   * @param {function(Function)} func
+   * @returns {jQuery.Deferred}
+   */
+  queue(func) {
+    this._queue.push(func);
 
-clippy.Queue.prototype = {
-	/***
-	 *
-	 * @param {function(Function)} func
-	 * @returns {jQuery.Deferred}
-	 */
-	queue: function (func) {
-		this._queue.push(func);
+    if (this._queue.length === 1 && !this._active) {
+      this._progressQueue();
+    }
+  }
 
-		if (this._queue.length === 1 && !this._active) {
-			this._progressQueue();
-		}
-	},
+  _progressQueue() {
+    // stop if nothing left in queue
+    if (!this._queue.length) {
+      this._onEmptyCallback();
+      return;
+    }
 
-	_progressQueue: function () {
-		// stop if nothing left in queue
-		if (!this._queue.length) {
-			this._onEmptyCallback();
-			return;
-		}
+    const f = this._queue.shift();
+    this._active = true;
 
-		const f = this._queue.shift();
-		this._active = true;
+    // execute function
+    const completeFunction = $.proxy(this.next, this);
+    f(completeFunction);
+  }
 
-		// execute function
-		const completeFunction = $.proxy(this.next, this);
-		f(completeFunction);
-	},
+  clear() {
+    this._queue = [];
+  }
 
-	clear: function () {
-		this._queue = [];
-	},
-
-	next: function () {
-		this._active = false;
-		this._progressQueue();
-	},
-};
+  next() {
+    this._active = false;
+    this._progressQueue();
+  }
+}

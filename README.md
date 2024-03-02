@@ -1,16 +1,16 @@
-[Clippy.JS](http://smore.com/clippy-js)
-=========
-Add Clippy or his friends to any website for instant nostalgia.  
-Read more about the project on [our homepage](http://smore.com/clippy-js).
+# Clippy.modern
 
+Add Clippy or his friends to any website for instant nostalgia.
 
-Usage: Setup
-------------
+This is a modernized version of [Clippy.js](https://github.com/clippyjs/clippy.js).
+
+## Usage: Setup
+
 Add this code to you to your page to enable Clippy.js.
 
 ```html
 <!-- Add the stylesheet to the head -->
-<link rel="stylesheet" type="text/css" href="clippy.css" media="all">
+<link rel="stylesheet" type="text/css" href="clippy.css" media="all" />
 
 ...
 
@@ -23,21 +23,20 @@ Add this code to you to your page to enable Clippy.js.
 
 <!-- Init script -->
 <script type="text/javascript">
-    clippy.load('Merlin', function(agent){
-        // do anything with the loaded agent
-        agent.show();
-    });
+  clippy.load("Merlin", function (agent) {
+    // do anything with the loaded agent
+    agent.show();
+  });
 </script>
-
 ```
 
-Usage: Actions
---------------
+## Usage: Actions
+
 All the agent actions are queued and executed by order, so you could stack them.
 
 ```javascript
 // play a given animation
-agent.play('Searching');
+agent.play("Searching");
 
 // play a random animation
 agent.animate();
@@ -47,13 +46,15 @@ agent.animations();
 // => ["MoveLeft", "Congratulate", "Hide", "Pleased", "Acknowledge", ...]
 
 // Show text balloon
-agent.speak('When all else fails, bind some paper together. My name is Clippy.');
+agent.speak(
+  "When all else fails, bind some paper together. My name is Clippy."
+);
 
 // move to the given point, use animation if available
-agent.moveTo(100,100);
+agent.moveTo(100, 100);
 
 // gesture at a given point (if gesture animation is available)
-agent.gestureAt(200,200);
+agent.gestureAt(200, 200);
 
 // stop the current action in the queue
 agent.stopCurrent();
@@ -62,8 +63,8 @@ agent.stopCurrent();
 agent.stop();
 ```
 
-Special Thanks
---------------
-* The awesome [Cinnamon Software](http://www.cinnamonsoftware.com/) for developing [Double Agent](http://doubleagent.sourceforge.net/)
-the program we used to unpack Clippy and his friends!
-* Microsoft, for creating clippy :)
+## Special Thanks
+
+- The awesome [Cinnamon Software](http://www.cinnamonsoftware.com/) for developing [Double Agent](http://doubleagent.sourceforge.net/)
+  the program we used to unpack Clippy and his friends!
+- Microsoft, for creating clippy :)

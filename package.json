@@ -1,0 +1,40 @@
+{
+  "name": "clippy.modern",
+  "version": "1.0.0",
+  "description": "Same old Clippy. Modern JavaScript.",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "build": "npm run clean && npm run build:agents && npm run build:css && npm run build:rollup",
+    "build:agents": "tsc -p ./tsconfig.agents.json && node dist-agents/agents/build-json.js",
+    "build:css": "cp src/clippy.css dist",
+    "build:rollup": "rollup --config",
+    "clean": "rimraf dist-agents dist",
+    "watch": "rollup -c -w"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/markusberg/clippy.modern.git"
+  },
+  "keywords": [
+    "clippy.js",
+    "clippy"
+  ],
+  "author": "Fireplace, Inc",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/markusberg/clippy.modern/issues"
+  },
+  "homepage": "https://github.com/markusberg/clippy.modern#readme",
+  "devDependencies": {
+    "@biomejs/biome": "^1.5.3",
+    "@lopatnov/rollup-plugin-uglify": "^2.1.5",
+    "@rollup/plugin-terser": "^0.4.4",
+    "@rollup/plugin-typescript": "^11.1.6",
+    "@types/node": "^20.11.20",
+    "rimraf": "^5.0.5",
+    "rollup": "^4.12.0",
+    "tslib": "^2.6.2",
+    "typescript": "^5.3.3"
+  }
+}

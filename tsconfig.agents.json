@@ -1,0 +1,9 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "outDir": "./dist-agents",
+    "declaration": false
+  },
+  "include": ["src/agents/**/*.ts"],
+  "exclude": []
+}

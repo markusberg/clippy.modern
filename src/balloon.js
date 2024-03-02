@@ -4,197 +4,199 @@
  * @constructor
  */
 clippy.Balloon = function (targetEl) {
-    this._targetEl = targetEl;
+	this._targetEl = targetEl;
 
-    this._hidden = true;
-    this._setup();
+	this._hidden = true;
+	this._setup();
 };
 
 clippy.Balloon.prototype = {
+	WORD_SPEAK_TIME: 200,
+	CLOSE_BALLOON_DELAY: 2000,
 
-    WORD_SPEAK_TIME:200,
-    CLOSE_BALLOON_DELAY:2000,
+	_setup: function () {
+		this._balloon = $(
+			'<div class="clippy-balloon"><div class="clippy-tip"></div><div class="clippy-content"></div></div> ',
+		).hide();
+		this._content = this._balloon.find(".clippy-content");
 
-    _setup:function () {
+		$(document.body).append(this._balloon);
+	},
 
-        this._balloon = $('<div class="clippy-balloon"><div class="clippy-tip"></div><div class="clippy-content"></div></div> ').hide();
-        this._content = this._balloon.find('.clippy-content');
+	reposition: function () {
+		const sides = ["top-left", "top-right", "bottom-left", "bottom-right"];
 
-        $(document.body).append(this._balloon);
-    },
+		for (let i = 0; i < sides.length; i++) {
+			const s = sides[i];
+			this._position(s);
+			if (!this._isOut()) break;
+		}
+	},
 
-    reposition:function () {
-        var sides = ['top-left', 'top-right', 'bottom-left', 'bottom-right'];
+	_BALLOON_MARGIN: 15,
 
-        for (var i = 0; i < sides.length; i++) {
-            var s = sides[i];
-            this._position(s);
-            if (!this._isOut()) break;
-        }
-    },
+	/***
+	 *
+	 * @param side
+	 * @private
+	 */
+	_position: function (side) {
+		const o = this._targetEl.offset();
+		const h = this._targetEl.height();
+		const w = this._targetEl.width();
+		o.top -= $(window).scrollTop();
+		o.left -= $(window).scrollLeft();
 
-    _BALLOON_MARGIN:15,
+		const bH = this._balloon.outerHeight();
+		const bW = this._balloon.outerWidth();
 
-    /***
-     *
-     * @param side
-     * @private
-     */
-    _position:function (side) {
-        var o = this._targetEl.offset();
-        var h = this._targetEl.height();
-        var w = this._targetEl.width();
-        o.top -= $(window).scrollTop();
-        o.left -= $(window).scrollLeft();
+		this._balloon.removeClass("clippy-top-left");
+		this._balloon.removeClass("clippy-top-right");
+		this._balloon.removeClass("clippy-bottom-right");
+		this._balloon.removeClass("clippy-bottom-left");
 
-        var bH = this._balloon.outerHeight();
-        var bW = this._balloon.outerWidth();
+		let left;
+		let top;
+		switch (side) {
+			case "top-left":
+				// right side of the balloon next to the right side of the agent
+				left = o.left + w - bW;
+				top = o.top - bH - this._BALLOON_MARGIN;
+				break;
+			case "top-right":
+				// left side of the balloon next to the left side of the agent
+				left = o.left;
+				top = o.top - bH - this._BALLOON_MARGIN;
+				break;
+			case "bottom-right":
+				// right side of the balloon next to the right side of the agent
+				left = o.left;
+				top = o.top + h + this._BALLOON_MARGIN;
+				break;
+			case "bottom-left":
+				// left side of the balloon next to the left side of the agent
+				left = o.left + w - bW;
+				top = o.top + h + this._BALLOON_MARGIN;
+				break;
+		}
 
-        this._balloon.removeClass('clippy-top-left');
-        this._balloon.removeClass('clippy-top-right');
-        this._balloon.removeClass('clippy-bottom-right');
-        this._balloon.removeClass('clippy-bottom-left');
+		this._balloon.css({ top: top, left: left });
+		this._balloon.addClass(`clippy-${side}`);
+	},
 
-        var left, top;
-        switch (side) {
-            case 'top-left':
-                // right side of the balloon next to the right side of the agent
-                left = o.left + w - bW;
-                top = o.top - bH - this._BALLOON_MARGIN;
-                break;
-            case 'top-right':
-                // left side of the balloon next to the left side of the agent
-                left = o.left;
-                top = o.top - bH - this._BALLOON_MARGIN;
-                break;
-            case 'bottom-right':
-                // right side of the balloon next to the right side of the agent
-                left = o.left;
-                top = o.top + h + this._BALLOON_MARGIN;
-                break;
-            case 'bottom-left':
-                // left side of the balloon next to the left side of the agent
-                left = o.left + w - bW;
-                top = o.top + h + this._BALLOON_MARGIN;
-                break;
-        }
+	_isOut: function () {
+		const o = this._balloon.offset();
+		const bH = this._balloon.outerHeight();
+		const bW = this._balloon.outerWidth();
 
-        this._balloon.css({top:top, left:left});
-        this._balloon.addClass('clippy-' + side);
-    },
+		const wW = $(window).width();
+		const wH = $(window).height();
+		const sT = $(document).scrollTop();
+		const sL = $(document).scrollLeft();
 
-    _isOut:function () {
-        var o = this._balloon.offset();
-        var bH = this._balloon.outerHeight();
-        var bW = this._balloon.outerWidth();
+		const top = o.top - sT;
+		const left = o.left - sL;
+		const m = 5;
+		if (top - m < 0 || left - m < 0) return true;
+		if (top + bH + m > wH || left + bW + m > wW) return true;
 
-        var wW = $(window).width();
-        var wH = $(window).height();
-        var sT = $(document).scrollTop();
-        var sL = $(document).scrollLeft();
+		return false;
+	},
 
-        var top = o.top - sT;
-        var left = o.left - sL;
-        var m = 5;
-        if (top - m < 0 || left - m < 0) return true;
-        if ((top + bH + m) > wH || (left + bW + m) > wW) return true;
+	speak: function (complete, text, hold) {
+		this._hidden = false;
+		this.show();
+		const c = this._content;
+		// set height to auto
+		c.height("auto");
+		c.width("auto");
+		// add the text
+		c.text(text);
+		// set height
+		c.height(c.height());
+		c.width(c.width());
+		c.text("");
+		this.reposition();
 
-        return false;
-    },
+		this._complete = complete;
+		this._sayWords(text, hold, complete);
+	},
 
-    speak:function (complete, text, hold) {
-        this._hidden = false;
-        this.show();
-        var c = this._content;
-        // set height to auto
-        c.height('auto');
-        c.width('auto');
-        // add the text
-        c.text(text);
-        // set height
-        c.height(c.height());
-        c.width(c.width());
-        c.text('');
-        this.reposition();
+	show: function () {
+		if (this._hidden) return;
+		this._balloon.show();
+	},
 
-        this._complete = complete;
-        this._sayWords(text, hold, complete);
-    },
+	hide: function (fast) {
+		if (fast) {
+			this._balloon.hide();
+			return;
+		}
 
-    show:function () {
-        if (this._hidden) return;
-        this._balloon.show();
-    },
+		this._hiding = window.setTimeout(
+			$.proxy(this._finishHideBalloon, this),
+			this.CLOSE_BALLOON_DELAY,
+		);
+	},
 
-    hide:function (fast) {
-        if (fast) {
-            this._balloon.hide();
-            return;
-        }
+	_finishHideBalloon: function () {
+		if (this._active) return;
+		this._balloon.hide();
+		this._hidden = true;
+		this._hiding = null;
+	},
 
-        this._hiding = window.setTimeout($.proxy(this._finishHideBalloon, this), this.CLOSE_BALLOON_DELAY);
-    },
+	_sayWords: function (text, hold, complete) {
+		this._active = true;
+		this._hold = hold;
+		const words = text.split(/[^\S-]/);
+		const time = this.WORD_SPEAK_TIME;
+		const el = this._content;
+		let idx = 1;
 
-    _finishHideBalloon:function () {
-        if (this._active) return;
-        this._balloon.hide();
-        this._hidden = true;
-        this._hiding = null;
-    },
+		this._addWord = $.proxy(function () {
+			if (!this._active) return;
+			if (idx > words.length) {
+				this._addWord = undefined;
+				this._active = false;
+				if (!this._hold) {
+					complete();
+					this.hide();
+				}
+			} else {
+				el.text(words.slice(0, idx).join(" "));
+				idx++;
+				this._loop = window.setTimeout($.proxy(this._addWord, this), time);
+			}
+		}, this);
 
-    _sayWords:function (text, hold, complete) {
-        this._active = true;
-        this._hold = hold;
-        var words = text.split(/[^\S-]/);
-        var time = this.WORD_SPEAK_TIME;
-        var el = this._content;
-        var idx = 1;
+		this._addWord();
+	},
 
+	close: function () {
+		if (this._active) {
+			this._hold = false;
+		} else if (this._hold) {
+			this._complete();
+		}
+	},
 
-        this._addWord = $.proxy(function () {
-            if (!this._active) return;
-            if (idx > words.length) {
-                delete this._addWord;
-                this._active = false;
-                if (!this._hold) {
-                    complete();
-                    this.hide();
-                }
-            } else {
-                el.text(words.slice(0, idx).join(' '));
-                idx++;
-                this._loop = window.setTimeout($.proxy(this._addWord, this), time);
-            }
-        }, this);
+	pause: function () {
+		window.clearTimeout(this._loop);
+		if (this._hiding) {
+			window.clearTimeout(this._hiding);
+			this._hiding = null;
+		}
+	},
 
-        this._addWord();
-
-    },
-
-    close:function () {
-        if (this._active) {
-            this._hold = false;
-        } else if (this._hold) {
-            this._complete();
-        }
-    },
-
-    pause:function () {
-        window.clearTimeout(this._loop);
-        if (this._hiding) {
-            window.clearTimeout(this._hiding);
-            this._hiding = null;
-        }
-    },
-
-    resume:function () {
-        if (this._addWord) {
-            this._addWord();
-        } else if (!this._hold && !this._hidden) {
-            this._hiding = window.setTimeout($.proxy(this._finishHideBalloon, this), this.CLOSE_BALLOON_DELAY);
-        }
-    }
-
-
+	resume: function () {
+		if (this._addWord) {
+			this._addWord();
+		} else if (!this._hold && !this._hidden) {
+			this._hiding = window.setTimeout(
+				$.proxy(this._finishHideBalloon, this),
+				this.CLOSE_BALLOON_DELAY,
+			);
+		}
+	},
 };
-

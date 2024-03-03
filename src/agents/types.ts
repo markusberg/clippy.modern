@@ -52,7 +52,6 @@ export interface Frame {
   branching?: {
     branches: Branch[];
   };
-  useExitBranching?: boolean;
   exitBranch?: number;
   sound?: string;
 }

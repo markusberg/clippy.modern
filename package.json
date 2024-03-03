@@ -17,6 +17,7 @@
     "url": "git+https://github.com/markusberg/clippy.modern.git"
   },
   "keywords": [
+    "clippy.modern",
     "clippy.js",
     "clippy"
   ],
@@ -28,7 +29,6 @@
   "homepage": "https://github.com/markusberg/clippy.modern#readme",
   "devDependencies": {
     "@biomejs/biome": "^1.5.3",
-    "@lopatnov/rollup-plugin-uglify": "^2.1.5",
     "@rollup/plugin-terser": "^0.4.4",
     "@rollup/plugin-typescript": "^11.1.6",
     "@types/node": "^20.11.20",

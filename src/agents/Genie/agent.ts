@@ -2272,7 +2272,6 @@ export const agent: AgentConfig = {
         { duration: 100, images: [[1792, 768]], exitBranch: 11 },
         { duration: 100, images: [[0, 0]] },
       ],
-      useExitBranching: true,
     },
     Searching: {
       frames: [

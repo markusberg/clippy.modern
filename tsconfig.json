@@ -2,17 +2,15 @@
   "compilerOptions": {
     "module": "NodeNext",
     "moduleResolution": "NodeNext",
-
     "target": "es2022",
     "lib": ["es2022", "DOM"],
-
     "strict": true,
-    "noEmitOnError": true,
+
     "declaration": true,
+    "incremental": true,
 
     "rootDir": "./src",
-    "outDir": "./dist"
+    "outDir": "./build"
   },
-  "include": ["src/**/*.ts"],
-  "exclude": ["src/agents/**/*"]
+  "include": ["src/**/*.ts"]
 }

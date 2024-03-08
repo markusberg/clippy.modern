@@ -1,24 +1,7 @@
-import { AgentConfig } from '../types.js';
+import { AgentConfig } from "../../types.js";
 
-export const agent: AgentConfig =  {
+export const agent: AgentConfig = {
 	overlayCount: 1,
-	sounds: [
-		"1",
-		"2",
-		"3",
-		"4",
-		"5",
-		"6",
-		"7",
-		"8",
-		"9",
-		"10",
-		"11",
-		"12",
-		"13",
-		"14",
-		"15",
-	],
 	framesize: [124, 93],
 	animations: {
 		Congratulate: {
@@ -2023,4 +2006,4 @@ export const agent: AgentConfig =  {
 			],
 		},
 	},
-}
+};

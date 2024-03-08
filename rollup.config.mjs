@@ -1,25 +1,33 @@
-import { existsSync, mkdirSync } from "node:fs";
+import { mkdirSync } from "node:fs";
 import { resolve } from "node:path";
-import typescript from "@rollup/plugin-typescript";
 import terser from "@rollup/plugin-terser";
+import dts from "rollup-plugin-dts";
 
 const dist = resolve("./dist");
 
 // Ensure dist directory exists
-if (!existsSync(dist)) {
-  mkdirSync(dist);
-}
+mkdirSync(dist, { recursive: true });
 
 const config = [
   {
     strictDeprecations: true,
-    input: "src/index.ts",
-    plugins: [typescript(), terser()],
+    input: "build/index.js",
+    plugins: [terser()],
     output: [
       {
         dir: dist,
         format: "es",
         sourcemap: true,
+      },
+    ],
+  },
+  {
+    input: "build/index.js",
+    plugins: [dts()],
+    output: [
+      {
+        file: "dist/index.d.ts",
+        format: "es",
       },
     ],
   },

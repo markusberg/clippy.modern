@@ -2,15 +2,18 @@
   "name": "clippy.modern",
   "version": "1.0.0",
   "description": "Same old Clippy. Modern JavaScript.",
-  "main": "index.js",
+  "exports": {
+    ".": "./dist/index.js"
+  },
   "type": "module",
   "scripts": {
-    "build": "npm run clean && npm run build:agents && npm run build:css && npm run build:rollup",
-    "build:agents": "tsc -p ./tsconfig.agents.json && node dist-agents/agents/build-json.js",
+    "build": "npm run build:tsc && npm run build:agents && npm run build:css && npm run build:rollup",
+    "build:tsc": "tsc -p .",
+    "build:agents": "node build/agents/build-json.js",
     "build:css": "cp src/clippy.css dist",
     "build:rollup": "rollup --config",
-    "clean": "rimraf dist-agents dist",
-    "watch": "rollup -c -w"
+    "clean": "rimraf build dist",
+    "watch": "npm run clean && nodemon --watch src -e ts --exec 'npm run build'"
   },
   "repository": {
     "type": "git",
@@ -30,10 +33,11 @@
   "devDependencies": {
     "@biomejs/biome": "^1.5.3",
     "@rollup/plugin-terser": "^0.4.4",
-    "@rollup/plugin-typescript": "^11.1.6",
     "@types/node": "^20.11.20",
+    "nodemon": "^3.1.0",
     "rimraf": "^5.0.5",
     "rollup": "^4.12.0",
+    "rollup-plugin-dts": "^6.1.0",
     "tslib": "^2.6.2",
     "typescript": "^5.3.3"
   }

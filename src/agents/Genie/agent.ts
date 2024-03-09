@@ -52,6 +52,7 @@ export const agent: AgentConfig = {
 				{ duration: 60, images: [[1664, 0]], exitBranch: 1, sound: "2" },
 				{ duration: 0 },
 			],
+			useExitBranching: true,
 		},
 		Hide: {
 			frames: [

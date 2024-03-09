@@ -43,7 +43,7 @@ export class Animator {
 
 	_setupElement(el: HTMLElement, size: FrameImage) {
 		const style = [
-			"display: none",
+			"visibility: hidden",
 			`width: ${size[0]}px`,
 			`height: ${size[1]}px`,
 			`background: url('${this._path}/map.png') no-repeat`,
@@ -92,11 +92,11 @@ export class Animator {
 			if (idx < images.length) {
 				const xy = images[idx];
 				const bg = `${-xy[0]}px ${-xy[1]}px`;
-				overlay.style.display = "block";
+				overlay.style.visibility = "visible";
 				// biome-ignore lint/suspicious/noExplicitAny: <explanation>
 				overlay.style["background-position" as any] = bg;
 			} else {
-				overlay.style.display = "none";
+				overlay.style.visibility = "hidden";
 			}
 		});
 	}

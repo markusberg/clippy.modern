@@ -15,66 +15,24 @@ export function getOffset(element: HTMLElement): Point {
 	return [x, y];
 }
 
-export function getWidth(
-	el: HTMLElement,
-	type: "inner" | "outer" | "width" | "full",
-): number | null {
-	if (type === "inner") {
-		return el.clientWidth;
-	}
-	if (type === "outer") {
-		return el.offsetWidth;
-	}
-
+export function getWidth(el: HTMLElement): number {
 	const style = window.getComputedStyle(el, null);
 
-	if (type === "width") {
-		return (
-			el.clientWidth -
-			parseInt(style.getPropertyValue("padding-left")) -
-			parseInt(style.getPropertyValue("padding-right"))
-		);
-	}
-
-	if (type === "full") {
-		return (
-			el.offsetWidth +
-			parseInt(style.getPropertyValue("margin-left")) +
-			parseInt(style.getPropertyValue("margin-right"))
-		);
-	}
-	return null;
+	return (
+		el.clientWidth -
+		parseInt(style.getPropertyValue("padding-left")) -
+		parseInt(style.getPropertyValue("padding-right"))
+	);
 }
 
-export function getHeight(
-	el: HTMLElement,
-	type: "inner" | "outer" | "height" | "full",
-): number | null {
-	if (type === "inner") {
-		return el.clientHeight;
-	}
-	if (type === "outer") {
-		return el.offsetHeight;
-	}
+export function getHeight(el: HTMLElement): number {
+	const style = getComputedStyle(el, null);
 
-	const style = window.getComputedStyle(el, null);
-	if (type === "height") {
-		return (
-			el.clientHeight -
-			parseInt(style.getPropertyValue("padding-top")) -
-			parseInt(style.getPropertyValue("padding-bottom"))
-		);
-	}
-
-	if (type === "full") {
-		return (
-			el.offsetHeight +
-			parseInt(style.getPropertyValue("margin-top")) +
-			parseInt(style.getPropertyValue("margin-bottom"))
-		);
-	}
-
-	return null;
+	return (
+		el.clientHeight -
+		parseInt(style.getPropertyValue("padding-top")) -
+		parseInt(style.getPropertyValue("padding-bottom"))
+	);
 }
 
 export function sleep(ms = 1000): Promise<boolean> {

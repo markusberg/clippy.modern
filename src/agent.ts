@@ -10,9 +10,10 @@ export class Agent {
 	_animator: Animator;
 	_balloon: Balloon;
 
-	get _hidden() {
-		return this._el.getAttribute("hidden") === "true" || false;
+	get isVisible() {
+		return this._el.style.visibility === "visible";
 	}
+
 	_offset: Point = [0, 0];
 	private _targetX?: number;
 	private _targetY?: number;
@@ -21,10 +22,9 @@ export class Agent {
 	private _dragUpdateLoop?: number;
 
 	constructor(path: string, data: AgentConfig, sounds: AgentSound) {
-		const el = document.createElement("div");
-		el.className = "clippy";
-		el.setAttribute("hidden", "true");
-		this._el = el;
+		this._el = document.createElement("div");
+		this._el.className = "clippy";
+		this._el.style.visibility = "hidden";
 
 		document.body.append(this._el);
 		this._animator = new Animator(this._el, path, data, sounds);
@@ -102,19 +102,16 @@ export class Agent {
 	}
 
 	show() {
-		this._el.removeAttribute("hidden");
+		this._el.style.visibility = "visible";
 
-		const cssTop = this._el.style.top;
-		const cssLeft = this._el.style.left;
+		const winWidth = window.innerWidth;
+		const winHeight = window.innerHeight;
+		const agentWidth = this._el.clientWidth;
+		const agentHeight = this._el.clientHeight;
 
-		if (cssTop === "auto" || cssLeft !== "auto") {
-			const wW = document.querySelector("html")?.clientWidth || 0;
-			const wH = document.querySelector("html")?.clientHeight || 0;
-			const left = wW * 0.8;
-			const top = (wH + window.scrollX) * 0.8;
-			this._el.style.top = `${top}px`;
-			this._el.style.left = `${left}px`;
-		}
+		// place agent in bottom right corner
+		this._el.style.top = `calc(${winHeight - agentHeight}px - 3rem)`;
+		this._el.style.left = `calc(${winWidth - agentWidth}px - 3rem`;
 
 		return this.play("Show");
 	}
@@ -155,24 +152,22 @@ export class Agent {
 	 */
 	_getDirection(coord: Point): Direction {
 		const offset = getOffset(this._el);
-		const height = getHeight(this._el, "height");
-		const width = getWidth(this._el, "width");
+		const height = getHeight(this._el);
+		const width = getWidth(this._el);
 
-		if (height !== null && width !== null) {
-			const centerX = offset[0] + width / 2;
-			const centerY = offset[1] + height / 2;
+		const centerX = offset[0] + width / 2;
+		const centerY = offset[1] + height / 2;
 
-			const a = centerY - coord[1];
-			const b = centerX - coord[0];
+		const a = centerY - coord[1];
+		const b = centerX - coord[0];
 
-			const r = Math.round((180 * Math.atan2(a, b)) / Math.PI);
+		const r = Math.round((180 * Math.atan2(a, b)) / Math.PI);
 
-			// Left and Right are for the character, not the screen :-/
-			if (-45 <= r && r < 45) return "Right";
-			if (45 <= r && r < 135) return "Up";
-			if ((135 <= r && r <= 180) || (-180 <= r && r < -135)) return "Left";
-			if (-135 <= r && r < -45) return "Down";
-		}
+		// Left and Right are for the character, not the screen :-/
+		if (-45 <= r && r < 45) return "Right";
+		if (45 <= r && r < 135) return "Up";
+		if ((135 <= r && r <= 180) || (-180 <= r && r < -135)) return "Left";
+		if (-135 <= r && r < -45) return "Down";
 
 		// sanity check
 		return "Top";
@@ -186,7 +181,7 @@ export class Agent {
 	 * @private
 	 */
 	_onQueueEmpty() {
-		if (this._hidden || this._isIdleAnimation()) {
+		if (!this.isVisible || this._isIdleAnimation()) {
 			return;
 		}
 		const idleAnim = this._getIdleAnimation();
@@ -229,18 +224,14 @@ export class Agent {
 	}
 
 	reposition() {
-		if (!this._hidden) {
+		console.log("repositioning");
+		if (this.isVisible) {
 			return;
 		}
-		const eHeight = getHeight(this._el, "outer");
-		const eWidth = getWidth(this._el, "outer");
-		const vw = document.querySelector("html")?.clientWidth || null;
-		const vh = document.querySelector("html")?.clientHeight || null;
-
-		if (vw === null || vh === null || eHeight === null || eWidth === null) {
-			console.log("Error Flynn!");
-			return;
-		}
+		const eHeight = this._el.offsetHeight;
+		const eWidth = this._el.offsetWidth;
+		const vw = window.innerWidth;
+		const vh = window.innerHeight;
 
 		const margin = 5;
 

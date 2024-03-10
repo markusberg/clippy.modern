@@ -9,28 +9,28 @@ const dist = resolve("./dist");
 mkdirSync(dist, { recursive: true });
 
 const config = [
-  {
-    strictDeprecations: true,
-    input: "build/index.js",
-    plugins: [terser()],
-    output: [
-      {
-        dir: dist,
-        format: "es",
-        sourcemap: true,
-      },
-    ],
-  },
-  {
-    input: "build/index.js",
-    plugins: [dts()],
-    output: [
-      {
-        file: "dist/index.d.ts",
-        format: "es",
-      },
-    ],
-  },
+	{
+		strictDeprecations: true,
+		input: "build/index.js",
+		plugins: [terser()],
+		output: [
+			{
+				dir: dist,
+				format: "es",
+				sourcemap: true,
+			},
+		],
+	},
+	{
+		input: "build/index.js",
+		plugins: [dts()],
+		output: [
+			{
+				file: "dist/index.d.ts",
+				format: "es",
+			},
+		],
+	},
 ];
 
 export default config;

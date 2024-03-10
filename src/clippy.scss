@@ -1,0 +1,66 @@
+.clippy {
+  cursor: pointer;
+}
+
+.clippy,
+.clippy-balloon {
+  position: fixed;
+  z-index: 1000;
+}
+
+.clippy-balloon {
+  background: #ffc;
+  color: black;
+  padding: 8px;
+  border: 1px solid black;
+  border-radius: 5px;
+
+  .clippy-content {
+    width: 10rem;
+    min-height: 2rem;
+    font-family: "Microsoft Sans", sans-serif;
+    font-size: 10pt;
+  }
+
+  .clippy-tip {
+    width: 10px;
+    height: 16px;
+    background: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAAgCAMAAAAlvKiEAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAAlQTFRF///MAAAA////52QwgAAAAAN0Uk5T//8A18oNQQAAAGxJREFUeNqs0kEOwCAIRFHn3//QTUU6xMyyxii+jQosrTPkyPEM6IN3FtzIRk1U4dFeKWQiH6pRRowMVKEmvronEynkwj0uZJgR22+YLopPSo9P34wJSamLSU7lSIWLJU7NkNomNlhqxUeAAQC+TQLZyEuJBwAAAABJRU5ErkJggg==)
+      no-repeat;
+    position: absolute;
+  }
+
+  &.clippy-above .clippy-tip {
+    top: 100%;
+    margin-top: 0px;
+    left: 0;
+    margin-left: 50px;
+  }
+
+  &.clippy-right .clippy-tip {
+    top: 0;
+    margin-top: 20px;
+    left: 0;
+    margin-left: -16px;
+    transform-origin: top left;
+    transform: rotate(-90deg);
+    background-position: 0px -16px;
+  }
+
+  &.clippy-left .clippy-tip {
+    top: 0;
+    margin-top: 20px;
+    left: 100%;
+    margin-left: 0px;
+    transform-origin: top left;
+    transform: rotate(-90deg);
+  }
+
+  &.clippy-below .clippy-tip {
+    top: 0;
+    margin-top: -16px;
+    left: 0;
+    margin-left: 50px;
+    background-position: 0px -16px;
+  }
+}

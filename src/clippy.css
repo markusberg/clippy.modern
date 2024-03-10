@@ -14,8 +14,7 @@
 }
 
 .clippy-content {
-    max-width: 200px;
-    min-width: 120px;
+    width: 10rem;
     font-family: "Microsoft Sans", sans-serif;
     font-size: 10pt;
 }
@@ -27,35 +26,34 @@
     position: absolute;
 }
 
-.clippy-top-left .clippy-tip {
+.clippy-above .clippy-tip {
     top: 100%;
     margin-top: 0px;
-    left: 100%;
-    margin-left: -50px;
+    left: 0;
+    margin-left: 50px;
 }
 
-.clippy-top-right .clippy-tip {
+.clippy-right .clippy-tip {
     top: 100%;
     margin-top: 0px;
     left: 0;
     margin-left: 50px;
     background-position: -10px 0;
-
 }
 
-.clippy-bottom-right .clippy-tip {
-    top: 0;
-    margin-top: -16px;
-    left: 0;
-    margin-left: 50px;
-    background-position: -10px -16px;
-}
-
-.clippy-bottom-left .clippy-tip {
+.clippy-left .clippy-tip {
     top: 0;
     margin-top: -16px;
     left: 100%;
     margin-left: -50px;
+    background-position: 0px -16px;
+}
+
+.clippy-below .clippy-tip {
+    top: 0;
+    margin-top: -16px;
+    left: 0;
+    margin-left: 50px;
     background-position: 0px -16px;
 }
 

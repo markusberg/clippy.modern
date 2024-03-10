@@ -12,8 +12,8 @@
     "build:agents": "node build/agents/build-json.js",
     "build:css": "cp src/clippy.css dist",
     "build:rollup": "rollup --config",
-    "clean": "rimraf build dist",
-    "watch": "npm run clean && nodemon --watch src -e ts --exec 'npm run build'"
+    "clean": "rimraf build dist *.tsbuildinfo",
+    "watch": "npm run clean && nodemon --watch src -e ts,css --exec 'npm run build'"
   },
   "repository": {
     "type": "git",

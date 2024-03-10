@@ -106,8 +106,8 @@ export class Agent {
 
 		const winWidth = window.innerWidth;
 		const winHeight = window.innerHeight;
-		const agentWidth = this._el.clientWidth;
-		const agentHeight = this._el.clientHeight;
+		const agentWidth = this._el.offsetWidth;
+		const agentHeight = this._el.offsetHeight;
 
 		// place agent in bottom right corner
 		this._el.style.top = `calc(${winHeight - agentHeight}px - 3rem)`;
@@ -224,34 +224,32 @@ export class Agent {
 	}
 
 	reposition() {
-		console.log("repositioning");
-		if (this.isVisible) {
+		if (!this.isVisible) {
 			return;
 		}
 		const eHeight = this._el.offsetHeight;
 		const eWidth = this._el.offsetWidth;
-		const vw = window.innerWidth;
-		const vh = window.innerHeight;
+		const windowWidth = window.innerWidth;
+		const windowHeight = window.innerHeight;
 
 		const margin = 5;
 
-		const offset = getOffset(this._el);
-		let left = offset[0] - window.scrollX;
-		let top = offset[1] - window.scrollY;
-		if (top - margin < 0) {
-			top = margin;
-		} else if (top + eHeight + margin > vh) {
-			top = vh - eHeight - margin;
+		let y = this._el.offsetTop - window.scrollY;
+		if (y <= margin) {
+			y = margin;
+		} else if (y + eHeight + margin > windowHeight) {
+			y = windowHeight - eHeight - margin;
 		}
 
-		if (left - margin < 0) {
-			left = margin;
-		} else if (left + eWidth + margin > vw) {
-			left = vw - eWidth - margin;
+		let x = this._el.offsetLeft - window.scrollX;
+		if (x <= margin) {
+			x = margin;
+		} else if (x + eWidth + margin > windowWidth) {
+			x = windowWidth - eWidth - margin;
 		}
 
-		this._el.style.left = `${left}px`;
-		this._el.style.top = `${top}px`;
+		this._el.style.left = `${x}px`;
+		this._el.style.top = `${y}px`;
 
 		// reposition balloon
 		this._balloon.reposition();
@@ -265,7 +263,8 @@ export class Agent {
 	/**************************** Drag ************************************/
 
 	_startDrag(event: MouseEvent) {
-		this._balloon.hidenow();
+		console.log("start drag");
+		// this._balloon.hidenow();
 		this._offset = this._calculateClickOffset(event);
 
 		this._moveHandle = this._dragMove.bind(this);
@@ -286,8 +285,10 @@ export class Agent {
 	}
 
 	private _updateLocation() {
+		console.log("update location");
 		this._el.style.top = `${this._targetY || 0}px`;
 		this._el.style.left = `${this._targetX || 0}px`;
+		this._balloon.reposition();
 		this._dragUpdateLoop = window.setTimeout(() => this._updateLocation(), 10);
 	}
 

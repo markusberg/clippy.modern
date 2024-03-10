@@ -1,6 +1,7 @@
 import { sleep } from "./utils.js";
 
 export type Side = "top-left" | "top-right" | "bottom-left" | "bottom-right";
+export type Placement = "above" | "left" | "below" | "right";
 
 export class Balloon {
 	private balloon: HTMLDivElement;
@@ -10,12 +11,8 @@ export class Balloon {
 	private WORD_SPEAK_TIME = 200;
 	private CLOSE_BALLOON_DELAY = 2000;
 	private BALLOON_MARGIN = 15;
-	private sides: Side[] = [
-		"top-left",
-		"top-right",
-		"bottom-left",
-		"bottom-right",
-	];
+
+	private placement: Placement[] = ["above", "left", "below", "right"];
 
 	constructor(private elAgent: HTMLElement) {
 		this.balloon = document.createElement("div");
@@ -35,82 +32,115 @@ export class Balloon {
 		document.body.append(this.balloon);
 	}
 
-	reposition() {
-		for (const side of this.sides) {
-			this.position(side);
-			if (!this.isOutOfFrame()) {
-				break;
-			}
+	reposition(): void {
+		for (const placement of this.placement) {
+			this.balloon.classList.remove(`clippy-${placement}`);
 		}
+
+		let placement: Placement;
+		let x: number;
+		let y: number;
+
+		if (this.spaceAbove) {
+			x = this.optimalX;
+			y =
+				this.elAgent.offsetTop -
+				this.balloon.offsetHeight -
+				this.BALLOON_MARGIN;
+			placement = "above";
+		} else if (this.spaceLeft) {
+			x = this.elAgent.offsetLeft - this.balloon.offsetWidth;
+			y = this.optimalY;
+			placement = "left";
+		} else if (this.spaceBelow) {
+			y =
+				this.elAgent.offsetTop +
+				this.elAgent.offsetHeight +
+				this.BALLOON_MARGIN;
+			x = this.optimalX;
+			placement = "below";
+		} else if (this.spaceRight) {
+			x = this.elAgent.offsetLeft + this.elAgent.offsetWidth;
+			y = this.optimalY;
+			placement = "right";
+		} else {
+			console.error("no space for balloon");
+			return;
+		}
+
+		this.balloon.style.left = `${x}px`;
+		this.balloon.style.top = `${y}px`;
+		this.balloon.classList.add(`clippy-${placement}`);
 	}
 
 	/**
-	 * Position balloon on requested side of agent
-	 * @param side
+	 * Get the optimal X value for above or below placement
 	 */
-	private position(side: Side) {
-		const agent = this.elAgent.getBoundingClientRect();
-		const height = this.balloon.offsetHeight;
-		const width = this.balloon.offsetWidth;
+	get optimalX(): number {
+		const optimalX =
+			this.elAgent.offsetLeft +
+			(this.elAgent.offsetWidth - this.balloon.offsetWidth) / 2;
 
-		for (const side of this.sides) {
-			this.balloon.classList.remove(`clippy-${side}`);
-		}
-
-		let left = 0;
-		let top = 0;
-		switch (side) {
-			case "top-left":
-				// right side of the balloon next to the right side of the agent
-				left = agent.left + agent.width - width;
-				top = agent.top - height - this.BALLOON_MARGIN;
-				break;
-			case "top-right":
-				// left side of the balloon next to the left side of the agent
-				left = agent.left;
-				top = agent.top - height - this.BALLOON_MARGIN;
-				break;
-			case "bottom-right":
-				// right side of the balloon next to the right side of the agent
-				left = agent.left;
-				top = agent.top + agent.height + this.BALLOON_MARGIN;
-				break;
-			case "bottom-left":
-				// left side of the balloon next to the left side of the agent
-				left = agent.left + agent.width - width;
-				top = agent.top + agent.height + this.BALLOON_MARGIN;
-				break;
-		}
-
-		this.balloon.style.top = `${top}px`;
-		this.balloon.style.left = `${left}px`;
-		this.balloon.classList.add(`clippy-${side}`);
+		return optimalX < 0
+			? 0
+			: optimalX + this.balloon.offsetWidth > window.innerWidth
+			  ? window.innerWidth - this.balloon.offsetWidth
+			  : optimalX;
 	}
 
 	/**
-	 * Is the balloon out of frame
-	 * @returns
+	 * Get the optimal Y value for left or right placement
 	 */
-	private isOutOfFrame() {
-		const height = this.balloon.offsetHeight;
-		const width = this.balloon.offsetWidth;
+	get optimalY(): number {
+		const optimalY =
+			this.elAgent.offsetTop +
+			(this.elAgent.offsetHeight - this.balloon.offsetHeight) / 2;
 
-		const boundingRect = this.balloon.getBoundingClientRect();
-		const x = boundingRect.left - window.scrollX;
-		const y = boundingRect.top - window.scrollY;
+		return optimalY < 0
+			? 0
+			: optimalY + this.balloon.offsetHeight > window.innerHeight
+			  ? window.innerHeight - this.balloon.offsetHeight
+			  : optimalY;
+	}
 
-		const margin = 5;
-		if (y - margin < 0 || x - margin < 0) {
-			return true;
-		}
-		if (
-			y + height + margin > window.innerHeight ||
-			x + width + margin > window.innerWidth
-		) {
-			return true;
-		}
+	/**
+	 * Will the balloon fit above the agent?
+	 */
+	get spaceAbove(): boolean {
+		const balloonHeight = this.balloon.offsetHeight;
+		const agentOffsetTop = this.elAgent.offsetTop;
+		return agentOffsetTop - balloonHeight > 0;
+	}
 
-		return false;
+	/**
+	 * Will the balloon fit below the agent?
+	 */
+	get spaceBelow(): boolean {
+		const balloonHeight = this.balloon.offsetHeight;
+		const agentOffsetTop = this.elAgent.offsetTop;
+		const agentHeight = this.elAgent.offsetHeight;
+		const winHeight = window.innerHeight;
+		return agentOffsetTop + agentHeight + balloonHeight < winHeight;
+	}
+
+	/**
+	 * Will the balloon fit to the left of the agent?
+	 */
+	get spaceLeft(): boolean {
+		const balloonWidth = this.balloon.offsetWidth;
+		const agentOffsetLeft = this.elAgent.offsetLeft;
+		return agentOffsetLeft - balloonWidth > 0;
+	}
+
+	/**
+	 * Will the balloon fit to the right of the agent?
+	 */
+	get spaceRight(): boolean {
+		const balloonWidth = this.balloon.offsetWidth;
+		const agentOffsetLeft = this.elAgent.offsetLeft;
+		const agentWidth = this.elAgent.offsetWidth;
+		const winWidth = window.innerWidth;
+		return agentOffsetLeft + agentWidth + balloonWidth < winWidth;
 	}
 
 	async speak(text: string, hold: boolean) {
@@ -122,8 +152,6 @@ export class Balloon {
 
 		this.hidenow();
 		this.content.innerHTML = words.join(" ");
-		this.content.style.height = "auto";
-		this.content.style.width = "15rem";
 		this.reposition();
 
 		this.balloon.style.visibility = "visible";

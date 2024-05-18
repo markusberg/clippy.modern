@@ -84,8 +84,8 @@ export class Balloon {
 		return optimalX < 0
 			? 0
 			: optimalX + this.balloon.offsetWidth > window.innerWidth
-			  ? window.innerWidth - this.balloon.offsetWidth
-			  : optimalX;
+				? window.innerWidth - this.balloon.offsetWidth
+				: optimalX;
 	}
 
 	/**
@@ -99,8 +99,8 @@ export class Balloon {
 		return optimalY < 0
 			? 0
 			: optimalY + this.balloon.offsetHeight > window.innerHeight
-			  ? window.innerHeight - this.balloon.offsetHeight
-			  : optimalY;
+				? window.innerHeight - this.balloon.offsetHeight
+				: optimalY;
 	}
 
 	/**
@@ -148,16 +148,12 @@ export class Balloon {
 			clearTimeout(this.hidingTimeout);
 		}
 
-		const words = text.split(/\s/g);
-
-		this.hidenow();
-		this.content.innerHTML = words.join(" ");
-		this.reposition();
-
 		this.balloon.style.visibility = "visible";
+		const words = text.split(/\s/g);
 
 		for (let idx = 0; idx <= words.length; idx++) {
 			this.content.innerHTML = words.slice(0, idx).join(" ");
+			this.reposition();
 			await sleep(this.WORD_SPEAK_TIME);
 		}
 

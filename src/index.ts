@@ -1,5 +1,5 @@
 import { Agent } from "./agent.js";
-import { AgentConfig, AgentSound, AgentType } from "./types.js";
+import type { AgentConfig, AgentSound, AgentType } from "./types.js";
 
 export async function load(name: AgentType, path?: string): Promise<Agent> {
 	const fullpath = path ? `${path}/${name}` : `./agents/${name}`;

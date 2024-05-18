@@ -1,35 +1,41 @@
 import { Animator } from "./animator.js";
 import { Balloon } from "./balloon.js";
-import { AgentConfig, AgentSound, Point } from "./types.js";
-import { getHeight, getOffset, getWidth, sleep } from "./utils.js";
+import type { AgentConfig, AgentSound, Point } from "./types.js";
+import { type BranchFunction, getOffset, sleep } from "./utils.js";
 
 export type Direction = "Right" | "Up" | "Left" | "Down" | "Top";
 
+// dummy dnd image 1x1 transparent pixel
+const imgDnd = new Image(1, 1);
+imgDnd.src =
+	"data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7";
+
 export class Agent {
-	_el: HTMLElement;
-	_animator: Animator;
-	_balloon: Balloon;
+	private el: HTMLElement;
+	private animator: Animator;
+	private balloon: Balloon;
+	private clickOffset: Point | null = null;
 
 	get isVisible() {
-		return this._el.style.visibility === "visible";
+		return this.el.style.visibility === "visible";
 	}
 
-	_offset: Point = [0, 0];
-	private _targetX?: number;
-	private _targetY?: number;
-	private _moveHandle?: (e: MouseEvent) => void;
-	private _upHandle?: (e: MouseEvent) => void;
-	private _dragUpdateLoop?: number;
-
 	constructor(path: string, data: AgentConfig, sounds: AgentSound) {
-		this._el = document.createElement("div");
-		this._el.className = "clippy";
-		this._el.style.visibility = "hidden";
+		this.el = document.createElement("div");
+		this.el.id = "clippy";
+		this.el.className = "clippy";
+		this.el.style.visibility = "hidden";
 
-		document.body.append(this._el);
-		this._animator = new Animator(this._el, path, data, sounds);
-		this._balloon = new Balloon(this._el);
-		this._setupEvents();
+		document.body.append(this.el);
+		this.animator = new Animator(this.el, path, data, sounds);
+		this.balloon = new Balloon(this.el);
+
+		// setup events
+		window.addEventListener("resize", () => this.reposition());
+		this.el.addEventListener("dblclick", () => this.onDoubleClick());
+		this.el.setAttribute("draggable", "true");
+		this.el.addEventListener("dragstart", (ev) => this.dragStart(ev));
+		document.addEventListener("dragover", (ev) => this.drag(ev));
 	}
 
 	/**
@@ -38,9 +44,9 @@ export class Agent {
 	 * @returns
 	 */
 	gestureAt(coord: Point) {
-		const d = this._getDirection(coord);
-		const gAnim = `Gesture${d}`;
-		const lookAnim = `Look${d}`;
+		const direction = this.getDirection(coord);
+		const gAnim = `Gesture${direction}`;
+		const lookAnim = `Look${direction}`;
 
 		const animation = this.hasAnimation(gAnim) ? gAnim : lookAnim;
 		return this.play(animation);
@@ -51,10 +57,10 @@ export class Agent {
 	 * @returns
 	 */
 	async destroy() {
-		this._balloon.destroy();
-		await this._animator.exitAnimation();
-		await this._animator.showAnimation("Hide");
-		this._el.remove();
+		this.balloon.destroy();
+		await this.animator.exitAnimation();
+		await this.animator.showAnimation("Hide");
+		this.el.remove();
 	}
 
 	/**
@@ -64,71 +70,65 @@ export class Agent {
 	 * @returns
 	 */
 	async moveTo(coord: Point, duration = 1000) {
-		const dir = this._getDirection(coord);
+		const dir = this.getDirection(coord);
 		const anim = `Move${dir}`;
 
 		// the simple case
 		if (duration === 0) {
-			this._el.style.top = `${coord[1]}px`;
-			this._el.style.left = `${coord[0]}px`;
+			this.el.style.top = `${coord[1]}px`;
+			this.el.style.left = `${coord[0]}px`;
 			this.reposition();
 			return;
 		}
 
-		const state = await this._animator.showAnimation(anim);
+		const branchFunction: BranchFunction = () => {
+			this.el.animate(
+				{ top: coord[1], left: coord[0] },
+				{ duration, iterations: 1 },
+			);
+			return sleep(duration);
+		};
 
-		this._el.animate(
-			{ top: coord[1], left: coord[0] },
-			{ duration, iterations: 1 },
-		);
-
-		if (state === "WAITING") {
-			await sleep(duration);
-			await this._animator.exitAnimation();
-		}
+		await this.animator.showAnimation(anim, branchFunction);
 	}
 
-	async play(name: string, timeout = 3000) {
+	async play(name: string) {
 		try {
-			await this._animator.exitAnimation();
-			const result = await this._animator.showAnimation(name);
-			if (result === "WAITING") {
-				await sleep(timeout);
-				await this._animator.exitAnimation();
-			}
+			await this.animator.exitAnimation();
+			await this.animator.showAnimation(name);
 		} catch (err) {
 			console.error(err);
 		}
 	}
 
 	show() {
-		this._el.style.visibility = "visible";
+		this.el.style.visibility = "visible";
 
 		const winWidth = window.innerWidth;
 		const winHeight = window.innerHeight;
-		const agentWidth = this._el.offsetWidth;
-		const agentHeight = this._el.offsetHeight;
+		const agentWidth = this.el.offsetWidth;
+		const agentHeight = this.el.offsetHeight;
 
 		// place agent in bottom right corner
-		this._el.style.top = `calc(${winHeight - agentHeight}px - 3rem)`;
-		this._el.style.left = `calc(${winWidth - agentWidth}px - 3rem`;
+		this.el.style.top = `calc(${winHeight - agentHeight}px - 3rem)`;
+		this.el.style.left = `calc(${winWidth - agentWidth}px - 3rem`;
 
 		return this.play("Show");
 	}
 
 	async speak(text: string, hold: boolean): Promise<void> {
-		await this._balloon.speak(text, hold);
+		await this.balloon.speak(text, hold);
 	}
 
 	hasAnimation(name: string) {
-		return this._animator.hasAnimation(name);
+		return this.animator.hasAnimation(name);
 	}
 
 	/***
 	 * Gets a list of animation names
 	 */
 	animations() {
-		return this._animator.animations();
+		return this.animator.animations();
 	}
 
 	/***
@@ -150,18 +150,15 @@ export class Agent {
 	 * @param coord
 	 * @returns "Right" | "Up" | "Left" | "Down" | "Top"
 	 */
-	_getDirection(coord: Point): Direction {
-		const offset = getOffset(this._el);
-		const height = getHeight(this._el);
-		const width = getWidth(this._el);
+	private getDirection(coord: Point): Direction {
+		const rect = this.el.getBoundingClientRect();
+		const centerX = rect.left + rect.width / 2;
+		const centerY = rect.top + rect.height / 2;
 
-		const centerX = offset[0] + width / 2;
-		const centerY = offset[1] + height / 2;
+		const x = centerX - coord[0];
+		const y = centerY - coord[1];
 
-		const a = centerY - coord[1];
-		const b = centerX - coord[0];
-
-		const r = Math.round((180 * Math.atan2(a, b)) / Math.PI);
+		const r = Math.round((180 * Math.atan2(y, x)) / Math.PI);
 
 		// Left and Right are for the character, not the screen :-/
 		if (-45 <= r && r < 45) return "Right";
@@ -180,27 +177,27 @@ export class Agent {
 	 * We need to transition the animation to an idle state
 	 * @private
 	 */
-	_onQueueEmpty() {
-		if (!this.isVisible || this._isIdleAnimation()) {
+	onQueueEmpty() {
+		if (!this.isVisible || this.isIdleAnimation()) {
 			return;
 		}
-		const idleAnim = this._getIdleAnimation();
-		this._animator.showAnimation(idleAnim);
+		const idleAnim = this.getIdleAnimation();
+		this.animator.showAnimation(idleAnim);
 	}
 
 	/**
 	 * Is the current animation Idle?
 	 * @returns
 	 */
-	_isIdleAnimation(): boolean {
-		const current = this._animator.currentAnimationName;
+	private isIdleAnimation(): boolean {
+		const current = this.animator.currentAnimationName;
 		return current ? current.startsWith("Idle") : false;
 	}
 
 	/**
 	 * Get a random Idle animation
 	 */
-	_getIdleAnimation() {
+	private getIdleAnimation() {
 		const idleAnimations = this.animations().filter((anim) =>
 			anim.includes("Idle"),
 		);
@@ -211,105 +208,64 @@ export class Agent {
 
 	/**************************** Events ************************************/
 
-	_setupEvents() {
-		window.addEventListener("resize", () => this.reposition());
-		this._el.addEventListener("mousedown", (event) => this._onMouseDown(event));
-		this._el.addEventListener("dblclick", () => this._onDoubleClick);
-	}
-
-	_onDoubleClick() {
-		if (!this.play("ClickedOn")) {
-			this.animate();
+	private async onDoubleClick() {
+		if (this.hasAnimation("ClickedOn")) {
+			await this.play("ClickedOn");
+		} else {
+			await this.animate();
 		}
 	}
 
-	reposition() {
+	private reposition(x = this.el.offsetLeft, y = this.el.offsetTop) {
 		if (!this.isVisible) {
 			return;
 		}
-		const eHeight = this._el.offsetHeight;
-		const eWidth = this._el.offsetWidth;
-		const windowWidth = window.innerWidth;
-		const windowHeight = window.innerHeight;
 
+		const coord = this.sanitizeCoordinates([x, y]);
+		this.el.style.left = `${coord[0]}px`;
+		this.el.style.top = `${coord[1]}px`;
+		this.balloon.reposition();
+	}
+
+	/**
+	 * Bound the coordinates to the viewport
+	 * @param coord
+	 */
+	private sanitizeCoordinates(coord: Point): Point {
 		const margin = 5;
+		const eHeight = this.el.offsetHeight;
+		const eWidth = this.el.offsetWidth;
 
-		let y = this._el.offsetTop - window.scrollY;
-		if (y <= margin) {
-			y = margin;
-		} else if (y + eHeight + margin > windowHeight) {
-			y = windowHeight - eHeight - margin;
-		}
-
-		let x = this._el.offsetLeft - window.scrollX;
+		let x = coord[0];
 		if (x <= margin) {
 			x = margin;
-		} else if (x + eWidth + margin > windowWidth) {
-			x = windowWidth - eWidth - margin;
+		} else if (x + eWidth + margin > window.innerWidth) {
+			x = window.innerWidth - eWidth - margin;
 		}
 
-		this._el.style.left = `${x}px`;
-		this._el.style.top = `${y}px`;
-
-		// reposition balloon
-		this._balloon.reposition();
-	}
-
-	_onMouseDown(e: MouseEvent) {
-		e.preventDefault();
-		this._startDrag(e);
-	}
-
-	/**************************** Drag ************************************/
-
-	_startDrag(event: MouseEvent) {
-		console.log("start drag");
-		// this._balloon.hidenow();
-		this._offset = this._calculateClickOffset(event);
-
-		this._moveHandle = this._dragMove.bind(this);
-		this._upHandle = this._finishDrag.bind(this);
-
-		window.addEventListener("mousemove", this._moveHandle);
-		window.addEventListener("mouseup", this._upHandle);
-
-		// fixme: use getAnimationFrame
-		this._dragUpdateLoop = window.setTimeout(() => this._updateLocation(), 10);
-	}
-
-	private _calculateClickOffset(e: MouseEvent): Point {
-		const mouseX = e.pageX;
-		const mouseY = e.pageY;
-		const offset = getOffset(this._el);
-		return [mouseX - offset[0], mouseY - offset[1]];
-	}
-
-	private _updateLocation() {
-		console.log("update location");
-		this._el.style.top = `${this._targetY || 0}px`;
-		this._el.style.left = `${this._targetX || 0}px`;
-		this._balloon.reposition();
-		this._dragUpdateLoop = window.setTimeout(() => this._updateLocation(), 10);
-	}
-
-	_dragMove(e: MouseEvent) {
-		e.preventDefault();
-		const x = e.clientX - this._offset[0];
-		const y = e.clientY - this._offset[1];
-		this._targetX = x;
-		this._targetY = y;
-	}
-
-	_finishDrag() {
-		window.clearTimeout(this._dragUpdateLoop);
-		// remove handles
-		if (this._moveHandle) {
-			window.removeEventListener("mousemove", this._moveHandle);
+		let y = coord[1];
+		if (y <= margin) {
+			y = margin;
+		} else if (y + eHeight + margin > window.innerHeight) {
+			y = window.innerHeight - eHeight - margin;
 		}
-		if (this._upHandle) {
-			window.removeEventListener("mouseup", this._upHandle);
+
+		return [x, y];
+	}
+
+	private dragStart(event: DragEvent) {
+		const offset = getOffset(this.el);
+		this.clickOffset = [event.pageX - offset[0], event.pageY - offset[1]];
+
+		// use a dummy image to prevent the default dnd image
+		event.dataTransfer?.setDragImage(imgDnd, 0, 0);
+	}
+
+	private drag(event: DragEvent) {
+		if (this.clickOffset) {
+			const x = event.clientX - this.clickOffset[0];
+			const y = event.clientY - this.clickOffset[1];
+			requestAnimationFrame(() => this.reposition(x, y));
 		}
-		// resume animations
-		this.reposition();
 	}
 }

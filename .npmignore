@@ -1,0 +1,7 @@
+.vscode
+biome.json
+lefthook.yml
+rollup.config.mjs
+src/**/*
+build/**/*
+tsconfig*

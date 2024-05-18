@@ -1,45 +1,44 @@
 {
-  "name": "clippy.modern",
-  "version": "1.0.0",
-  "description": "Same old Clippy. Modern JavaScript.",
-  "exports": {
-    ".": "./dist/index.js"
-  },
-  "type": "module",
-  "scripts": {
-    "build": "npm run build:tsc && npm run build:agents && npm run build:scss && npm run build:rollup",
-    "build:tsc": "tsc -p .",
-    "build:agents": "node build/agents/build-json.js",
-    "build:scss": "sass src/clippy.scss dist/clippy.css",
-    "build:rollup": "rollup --config",
-    "clean": "rimraf build dist *.tsbuildinfo",
-    "watch": "npm run clean && nodemon --watch src -e ts,scss --exec 'npm run build'"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/markusberg/clippy.modern.git"
-  },
-  "keywords": [
-    "clippy.modern",
-    "clippy.js",
-    "clippy"
-  ],
-  "author": "Fireplace, Inc",
-  "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/markusberg/clippy.modern/issues"
-  },
-  "homepage": "https://github.com/markusberg/clippy.modern#readme",
-  "devDependencies": {
-    "@biomejs/biome": "^1.5.3",
-    "@rollup/plugin-terser": "^0.4.4",
-    "@types/node": "^20.11.20",
-    "nodemon": "^3.1.0",
-    "rimraf": "^5.0.5",
-    "rollup": "^4.12.0",
-    "rollup-plugin-dts": "^6.1.0",
-    "sass": "^1.71.1",
-    "tslib": "^2.6.2",
-    "typescript": "^5.3.3"
-  }
+	"name": "clippy.modern",
+	"version": "0.0.1",
+	"description": "Same old Clippy. Modern JavaScript.",
+	"exports": {
+		".": "./dist/index.js"
+	},
+	"type": "module",
+	"scripts": {
+		"build": "npm run build:tsc && npm run build:agents && npm run build:scss && npm run build:rollup",
+		"build:tsc": "tsc -p .",
+		"build:agents": "node build/agents/build-json.js",
+		"build:scss": "sass src/clippy.scss:dist/clippy.css",
+		"build:rollup": "rollup --config",
+		"prepublishOnly": "npm run clean && npm run build",
+		"clean": "rimraf build dist *.tsbuildinfo",
+		"prep": "npm run clean && npm install && lefthook install",
+		"watch": "npm run clean && nodemon --watch src -e ts,scss --exec 'npm run build'"
+	},
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/markusberg/clippy.modern.git"
+	},
+	"keywords": ["clippy.modern", "clippy.js", "clippy"],
+	"author": "Fireplace, Inc",
+	"license": "MIT",
+	"bugs": {
+		"url": "https://github.com/markusberg/clippy.modern/issues"
+	},
+	"homepage": "https://github.com/markusberg/clippy.modern#readme",
+	"devDependencies": {
+		"@biomejs/biome": "^1.5.3",
+		"@rollup/plugin-terser": "^0.4.4",
+		"@types/node": "^20.11.20",
+		"lefthook": "^1.6.12",
+		"nodemon": "^3.1.0",
+		"rimraf": "^5.0.5",
+		"rollup": "^4.12.0",
+		"rollup-plugin-dts": "^6.1.0",
+		"sass": "^1.71.1",
+		"tslib": "^2.6.2",
+		"typescript": "^5.4.5"
+	}
 }

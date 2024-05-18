@@ -1,3 +1,8 @@
+# Status 2024-04-20 -- Work in progress
+
+Please note that this project is still incomplete. The code has been modernized, but
+there are missing features, and bugs. 
+
 # Clippy.modern
 
 Add Clippy or his friends to any website for instant nostalgia.
@@ -12,21 +17,16 @@ Add this code to you to your page to enable Clippy.js.
 <!-- Add the stylesheet to the head -->
 <link rel="stylesheet" type="text/css" href="clippy.css" media="all" />
 
-...
-
-<!-- Add these scripts to  the bottom of the page -->
-<!-- jQuery 1.7+ -->
-<script src="jquery.1.7.min.js"></script>
-
 <!-- Clippy.js -->
-<script src="clippy.min.js"></script>
+<script src="clippy.js" type="module"></script>
 
 <!-- Init script -->
-<script type="text/javascript">
-  clippy.load("Merlin", function (agent) {
-    // do anything with the loaded agent
-    agent.show();
-  });
+<script type="module">
+  import { load } from './clippy.js';
+
+  const agent = await load('Clippy');
+  await agent.show();
+  await agent.speak('Hello. It looks like you\'re attempting to train a Large Language Model. Would you like some help with that?');
 </script>
 ```
 

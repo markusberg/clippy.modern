@@ -1,4 +1,4 @@
-import { AgentConfig } from "../../types.js";
+import type { AgentConfig } from "../../types.js";
 
 export const agent: AgentConfig = {
 	overlayCount: 1,

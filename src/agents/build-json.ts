@@ -5,7 +5,7 @@ import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
 import { copyFileSync, mkdirSync, writeFileSync } from "node:fs";
-import { AgentType } from "../types.js";
+import type { AgentType } from "../types.js";
 
 const agents: AgentType[] = [
 	"Clippy",

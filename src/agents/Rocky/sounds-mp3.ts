@@ -1,4 +1,4 @@
-import { AgentSound } from "../../types.js";
+import type { AgentSound } from "../../types.js";
 
 export const sound: AgentSound = {
 	"1": "data:audio/mpeg;base64,SUQzBAAAAAAAGFRTU0UAAAAOAAADTGF2ZjU0LjUuMTAwAP/zUMAAAAAAAAAAAABJbmZvAAAABwAAAAQAAAIkAG1tbW1tbW1tbW1tbW1tbW1tbW1tbW1tbZ6enp6enp6enp6enp6enp6enp6enp6enp7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7O/////////////////////////////////wD/80DEABDwxngDSCgAhfBAoDQPBwdgKAsMcXfRHd3fREzv8hMggHGEwAAgooflPeoMQTPghyhyj3fD9QfUGOsP/+UBAEP/BMHwfP1g+f/BAEGruVq9GFCQAqC10UkytZp4IoBeyXDlFP/zQsQXGknWrAGPaACHCukXzc3Mi8tePcqJUuol2ZIp1y+swpLRZKroOaFwvoF5KZXt6s1L67aaKTrR0krtf6SBxE3d0eQPPGXkhi0N5eaBNIZCRy69FvTbVr/0R//HqkJI0JyyHMU5yf/zQMQJFDmCmAGBEACbk7+jtLI8xqqh0s6pyyo7XUnYp+pa5zuKnLMOLPcoNaViRI8YmMELUMAp36SIdDR4kceoK5uBwMs6ViUtxIF/5cLgI7/KnSsSAQQQAAQAIhnyPzhT46RHvx4k//NCxBMTszIU84c4AHfjxIdX/GpQ4dFX/nKUOUVD3/+oCgiGWRTf//41KIgjDxdkcdHRJ////xGEY8oc6UecVVv/////NRCQpUxBTUUzLjk5LjVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV",
